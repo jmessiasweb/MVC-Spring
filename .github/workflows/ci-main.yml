@@ -3,30 +3,66 @@ name: CI/CD - Main
 on:
   push:
     branches:
-      - main
+      - develop
   pull_request:
     branches:
-      - main
+      - develop
 
 jobs:
   build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1 - Clonar o código
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Configurar JDK 17
+      # 2 - Cache do Gradle
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}
+
+      # 3 - Configurar JDK 17
+      - name: Configurar JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'temurin'
 
-      - name: Build e Testes
-        run: |
-          ./mvnw clean install
+      # 4 - Garantir permissão para o gradlew
+      - name: Dar permissão de execução ao gradlew
+        run: chmod +x gradlew
 
-      - name: Deploy em Produção
-        if: github.ref == 'refs/heads/main'
+      # 5 - Build e Testes
+      - name: Build e Testes
+        run: ./gradlew clean build
+
+      # 6 - Build da imagem Docker
+      - name: Build Docker Image
         run: |
-          echo "Deploy no ambiente de Produção..."
+          docker build -t myapp-develop:latest .
+
+      # 7 - Login no Docker Hub
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 8 - Push da imagem Docker
+      - name: Push Docker Image
+        run: |
+          docker tag myapp-develop:latest my-dockerhub-username/myapp-develop:latest
+          docker push my-dockerhub-username/myapp-develop:latest
+
+      # 9 - Deploy em Homologação
+      - name: Deploy em Homologação
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          echo "Deploy do container em ambiente de homologação..."
