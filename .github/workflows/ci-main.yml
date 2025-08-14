@@ -3,10 +3,10 @@ name: CI/CD - Main
 on:
   push:
     branches:
-      - develop
+      - main
   pull_request:
     branches:
-      - develop
+      - main
 
 jobs:
   build-test-deploy:
@@ -45,7 +45,7 @@ jobs:
       # 6 - Build da imagem Docker
       - name: Build Docker Image
         run: |
-          docker build -t myapp-develop:latest .
+          docker build -t myapp-main:latest .
 
       # 7 - Login no Docker Hub
       - name: Docker Login
@@ -57,11 +57,19 @@ jobs:
       # 8 - Push da imagem Docker
       - name: Push Docker Image
         run: |
-          docker tag myapp-develop:latest ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
+          docker tag myapp-main:latest ${{ secrets.DOCKER_USERNAME }}/myapp-main:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/myapp-main:latest
 
       # 9 - Deploy em Homologação
       - name: Deploy em Homologação
         if: github.ref == 'refs/heads/develop'
-        run: |
-          echo "Deploy do container em ambiente de homologação..."
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/myapp-main:latest
+            docker stop myapp-main || true
+            docker rm myapp-main || true
+            docker run -d --name myapp-develop -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/myapp-main:latest
