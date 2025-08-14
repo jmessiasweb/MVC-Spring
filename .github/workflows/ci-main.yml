@@ -57,8 +57,8 @@ jobs:
       # 8 - Push da imagem Docker
       - name: Push Docker Image
         run: |
-          docker tag myapp-develop:latest my-dockerhub-username/myapp-develop:latest
-          docker push my-dockerhub-username/myapp-develop:latest
+          docker tag myapp-develop:latest ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
 
       # 9 - Deploy em Homologação
       - name: Deploy em Homologação
