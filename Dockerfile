@@ -20,6 +20,6 @@ WORKDIR /app
 # Copia o JAR correto
 COPY target/mvc-0.0.1-SNAPSHOT.jar app.jar
 
-
+# porta
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","app.jar"]
