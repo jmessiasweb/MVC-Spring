@@ -3,10 +3,10 @@ name: CI/CD - Master
 on:
   push:
     branches:
-      - develop
+      - master
   pull_request:
     branches:
-      - develop
+      - master
 
 jobs:
   build-test-deploy:
@@ -60,8 +60,17 @@ jobs:
           docker tag myapp-develop:latest ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
 
-      # 9 - Deploy em Homologação
-      - name: Deploy em Homologação
+      # 9 - Deploy em Produção
+
+      - name: Deploy em Produção
         if: github.ref == 'refs/heads/develop'
-        run: |
-          echo "Deploy do container em ambiente de homologação..."
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
+            docker stop myapp-develop || true
+            docker rm myapp-develop || true
+            docker run -d --name myapp-develop -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
