@@ -63,5 +63,13 @@ jobs:
       # 9 - Deploy em Homologação
       - name: Deploy em Homologação
         if: github.ref == 'refs/heads/develop'
-        run: |
-          echo "Deploy do container em ambiente de homologação..."
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
+            docker stop myapp-develop || true
+            docker rm myapp-develop || true
+            docker run -d --name myapp-develop -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/myapp-develop:latest
