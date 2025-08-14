@@ -47,11 +47,11 @@
             <artifactId>spring-web</artifactId>
             <version>5.3.17</version>
         </dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>5.3.16</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -74,11 +74,11 @@
 		</dependency>
 
 		<!-- Exemplo PostgreSQL -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 
 	<build>
