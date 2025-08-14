@@ -8,7 +8,7 @@ class MvcApplicationTests {
 
 	@Test
 	void contextLoads() {
-		
+	
 	}
 
 }
